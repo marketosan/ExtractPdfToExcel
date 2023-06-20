@@ -3,10 +3,10 @@ from tkinter import filedialog
 
 
 class FileSelectGUI:
-    WINDOW_WIDTH = 700
-    WINDOW_HEIGHT = 400
+    FRAME_WIDTH = 450
+    FRAME_HEIGHT = 400
     DISTANCE_FROM_TOP = 100
-    DISTANCE_FROM_LEFT = 320
+    DISTANCE_FROM_LEFT = 420
     RESIZABLE_X = False
     RESIZABLE_Y = False
 
@@ -17,7 +17,7 @@ class FileSelectGUI:
         # Configure window properties
         self.root_frame.title("Extract PDF to Excel")
         self.root_frame.geometry(
-            f"{self.WINDOW_WIDTH}x{self.WINDOW_HEIGHT}+{self.DISTANCE_FROM_LEFT}+{self.DISTANCE_FROM_TOP}")
+            f"{self.FRAME_WIDTH}x{self.FRAME_HEIGHT}+{self.DISTANCE_FROM_LEFT}+{self.DISTANCE_FROM_TOP}")
         self.root_frame.resizable(self.RESIZABLE_X, self.RESIZABLE_Y)
 
         # Create listbox to display file paths
@@ -40,12 +40,13 @@ class FileSelectGUI:
     def browse_files(self):
         selected_files = set(filedialog.askopenfilenames())
         for file_path in selected_files:
-            if file_path not in self.saved_file_paths:
-                self.listbox.insert(tk.END, file_path)
+            file_name = file_path.strip().split('/')[-1]
+
+            if file_name.lower().endswith('.pdf') and file_path not in self.saved_file_paths:
+                self.listbox.insert(tk.END, file_name)
                 self.saved_file_paths.add(file_path)
 
     def save_paths(self):
-        # TODO
         self.root_frame.quit()
 
 
