@@ -1,8 +1,8 @@
-import pdfquery, re
+import pdfquery
 from pdfminer.layout import LTTextLineHorizontal, LTTextBoxHorizontal
 
-from PdfToExcel.product import Product
-from PdfToExcel.validationHelper import ValidationHelper
+from PdfToExcel.Product import Product
+from PdfToExcel.ValidationHelper import ValidationHelper
 
 
 class MyPdfToExcelExtractor:
@@ -13,14 +13,15 @@ class MyPdfToExcelExtractor:
     QUANTITY_INX_AFTER_LINE = 4
     DELIVERY_DATE_INX_AFTER_LINE = 7
 
-    def __init__(self, validation_helper, file_path):
-        self.validation_helper = validation_helper
+    def __init__(self, file_path):
+        self.validation_helper = ValidationHelper()
         self.final_items = list()
         self.pdf = pdfquery.PDFQuery(file_path)
         self.pdf.load()
 
         self.get_purchase_order()
 
+    # only to create xml representation of pdf
     def extract_pdf_to_xml_file(self):
         self.pdf.tree.write('my_pdf_as_xml.xml', pretty_print=True)
 
@@ -40,7 +41,6 @@ class MyPdfToExcelExtractor:
                     line_text_value = self.validation_helper.get_value(child_text_line_horizontal)
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
                         self.final_items.append(self.get_product_from_parent_rect(idx, parent_rect_with_info))
-                    # print(f"{idx}: {value}")
 
 
     def get_product_from_parent_rect(self, index, parent_rect):
@@ -48,12 +48,12 @@ class MyPdfToExcelExtractor:
         if len(rect_children) < index + self.DELIVERY_DATE_INX_AFTER_LINE:
             raise ValueError("Received unexpected PDF format, wont be able to retrieve data")
 
-        part_number = validationHelper.validate_and_get_part_number(
+        part_number = self.validation_helper.validate_and_get_part_number(
             rect_children[index + self.PART_NUMBER_INX_AFTER_LINE])
-        description = validationHelper.validate_and_get_description(
+        description = self.validation_helper.validate_and_get_description(
             rect_children[index + self.DESCRIPTION_INX_AFTER_LINE])
-        quantity = validationHelper.validate_and_get_quantity(rect_children[index + self.QUANTITY_INX_AFTER_LINE])
-        delivery_date = validationHelper.validate_and_get_delivery_date(
+        quantity = self.validation_helper.validate_and_get_quantity(rect_children[index + self.QUANTITY_INX_AFTER_LINE])
+        delivery_date = self.validation_helper.validate_and_get_delivery_date(
             rect_children[index + self.DELIVERY_DATE_INX_AFTER_LINE])
 
         return Product(part_number, description, quantity, delivery_date, self.purchase_order_value)
@@ -67,7 +67,6 @@ class MyPdfToExcelExtractor:
 # ==============================================================================
 # MAIN
 if __name__ == '__main__':
-    validationHelper = ValidationHelper()
-    pdfToExcelExtractor = MyPdfToExcelExtractor(validationHelper, './mypdf.PDF')
+    pdfToExcelExtractor = MyPdfToExcelExtractor('./samples/mypdf3.PDF')
     pdfToExcelExtractor.extract_and_save_all_fields()
     pdfToExcelExtractor.print_extracted_data()

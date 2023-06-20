@@ -6,15 +6,15 @@ from pdfminer.layout import LTTextBoxHorizontal, LTTextLineHorizontal
 
 class ValidationHelper:
     PURCHASE_ORDER_FORMAT = r'^PURCHASE ORDER:(\s)*\d+$'
-    PART_NUMBER_PATTERN = r'^(\d+-)+\d+$'
-    PART_NUMBER_PATTERN_WITH_AA = r'^\d+\s+(\d+-)+\d+$'
+    PART_NUMBER_PATTERN = r'^(\d+-)+\d+$'  # e.g 400-0178-123
+    PART_NUMBER_PATTERN_WITH_AA = r'^\d+\s+(\d+-)+\d+$'  # e.g 0010 400-0178
     DATE_FORMAT = '%d.%m.%Y'
 
     def __init__(self):
         pass
 
     @staticmethod
-    def validate_x_location(text_line_horizontal, range_start, range_end):
+    def valid_x_location(text_line_horizontal, range_start, range_end):
         x0_position = float(text_line_horizontal.attrib.get('x0'))
         return x0_position >= range_start and x0_position <= range_end
 
@@ -48,38 +48,52 @@ class ValidationHelper:
         else:
             raise ValueError("Unable to find valid purchase order")
 
+    @staticmethod
+    def append_confirm(value):
+        return value + " (CONFIRM)"
+
     def validate_and_get_part_number(self, textbox_or_text_line):
         if isinstance(textbox_or_text_line.layout, LTTextBoxHorizontal):
             for child_text_line_horizontal in textbox_or_text_line.iterchildren():
                 if len(child_text_line_horizontal.getchildren()) == 1:
-                    value = self.get_value(child_text_line_horizontal)
-                    if self.has_format(value, self.PART_NUMBER_PATTERN) and self.validate_x_location(
-                            child_text_line_horizontal, 44, 46):
-                        return self.get_value(child_text_line_horizontal)
+                    part_number = self.get_value(child_text_line_horizontal)
+                    if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
+                        part_number = part_number.split()[1]
+                    if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+                        if not self.valid_x_location(child_text_line_horizontal, 44, 46):
+                            part_number = self.append_confirm(part_number)
+                        return part_number
 
         if isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
-            value = self.get_value(textbox_or_text_line)
-            if self.has_format(value, self.PART_NUMBER_PATTERN_WITH_AA):
-                value = value.split()[1]
-            if self.has_format(value, self.PART_NUMBER_PATTERN):
-                return value
+            part_number = self.get_value(textbox_or_text_line)
+            if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
+                part_number = part_number.split()[1]
+            # no x_validation as this is non usual scenario
+            if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+                return part_number
 
         raise ValueError("Unable to find valid part number")
 
     def validate_and_get_description(self, text_line_horizontal):
-        if self.validate_x_location(text_line_horizontal, 228, 232):
-            return self.get_value(text_line_horizontal)
-        raise ValueError("Unable to find valid description")
+        description = self.get_value(text_line_horizontal)
+        if not self.valid_x_location(text_line_horizontal, 228, 232):
+            description = self.append_confirm(description)
+        return description
+        # raise ValueError("Unable to find valid description")
 
     def validate_and_get_quantity(self, text_line_horizontal):
-        if self.validate_x_location(text_line_horizontal, 510, 523):
-            value = self.get_value(text_line_horizontal)
-            if value.isnumeric():
-                return value
+        quantity = self.get_value(text_line_horizontal)
+        if quantity.isnumeric():
+            if not self.valid_x_location(text_line_horizontal, 510, 523):
+                quantity = self.append_confirm(quantity)
+            return quantity
         raise ValueError("Unable to find valid quantity")
 
     def validate_and_get_delivery_date(self, text_line_horizontal):
-        date = self.get_value(text_line_horizontal)
-        if self.validate_x_location(text_line_horizontal, 750, 753) and self.validate_date(date, self.DATE_FORMAT):
-            return date
-        raise ValueError("Unable to find valid delivery date")
+        delivery_date = self.get_value(text_line_horizontal)
+        if not self.valid_x_location(text_line_horizontal, 750, 753) and self.validate_date(delivery_date,
+                                                                                            self.DATE_FORMAT):
+            delivery_date = self.append_confirm(delivery_date)
+        return delivery_date
+
+        # raise ValueError("Unable to find valid delivery date")
