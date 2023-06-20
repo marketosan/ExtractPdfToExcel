@@ -95,5 +95,4 @@ class ValidationHelper:
                                                                                             self.DATE_FORMAT):
             delivery_date = self.append_confirm(delivery_date)
         return delivery_date
-
         # raise ValueError("Unable to find valid delivery date")

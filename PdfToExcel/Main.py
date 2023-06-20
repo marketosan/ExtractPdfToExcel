@@ -1,8 +1,12 @@
-import pdfquery
-from pdfminer.layout import LTTextLineHorizontal, LTTextBoxHorizontal
+import traceback
 
+import pdfquery
+import tkinter as tk
+
+from pdfminer.layout import LTTextLineHorizontal, LTTextBoxHorizontal
 from PdfToExcel.Product import Product
 from PdfToExcel.ValidationHelper import ValidationHelper
+from tkinter import messagebox
 
 
 class MyPdfToExcelExtractor:
@@ -42,7 +46,6 @@ class MyPdfToExcelExtractor:
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
                         self.final_items.append(self.get_product_from_parent_rect(idx, parent_rect_with_info))
 
-
     def get_product_from_parent_rect(self, index, parent_rect):
         rect_children = parent_rect.getchildren()
         if len(rect_children) < index + self.DELIVERY_DATE_INX_AFTER_LINE:
@@ -63,10 +66,20 @@ class MyPdfToExcelExtractor:
             print(item)
             print('-----------------')
 
+    @staticmethod
+    def show_error_popup(exception):
+        root = tk.Tk()
+        root.withdraw()  # Hide the main window
+        error_message = f"{type(e).__name__}: {str(e)}\n Please contact admin to resolve issue.\n\nTraceback:\n{traceback.format_exc()}"
+        messagebox.showerror("Error", error_message)
+
 
 # ==============================================================================
 # MAIN
 if __name__ == '__main__':
-    pdfToExcelExtractor = MyPdfToExcelExtractor('./samples/mypdf3.PDF')
-    pdfToExcelExtractor.extract_and_save_all_fields()
-    pdfToExcelExtractor.print_extracted_data()
+    try:
+        pdfToExcelExtractor = MyPdfToExcelExtractor('./samples/mypdf.PDF')
+        pdfToExcelExtractor.extract_and_save_all_fields()
+        pdfToExcelExtractor.print_extracted_data()
+    except Exception as e:
+        MyPdfToExcelExtractor.show_error_popup(e)
