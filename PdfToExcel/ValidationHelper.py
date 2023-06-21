@@ -55,28 +55,31 @@ class ValidationHelper:
     def validate_and_get_part_number(self, textbox_or_text_line):
         if isinstance(textbox_or_text_line.layout, LTTextBoxHorizontal):
             for child_text_line_horizontal in textbox_or_text_line.iterchildren():
-                if len(child_text_line_horizontal.getchildren()) == 1:
-                    part_number = self.get_value(child_text_line_horizontal)
-                    if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
-                        part_number = part_number.split()[1]
-                    if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-                        if not self.valid_x_location(child_text_line_horizontal, 44, 46):
-                            part_number = self.append_confirm(part_number)
-                        return part_number
+                part_number = self.get_value(child_text_line_horizontal)
+                if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
+                    part_number = part_number.split()[1]
+                if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+                    if not (self.valid_x_location(child_text_line_horizontal, 44, 46) or self.valid_x_location(
+                            child_text_line_horizontal, 8, 9)):
+                        part_number = self.append_confirm(part_number)
+                    return part_number
 
-        if isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
+        elif isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
             part_number = self.get_value(textbox_or_text_line)
             if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
                 part_number = part_number.split()[1]
             # no x_validation as this is non usual scenario
             if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+                if not (self.valid_x_location(textbox_or_text_line, 44, 46) or self.valid_x_location(
+                        textbox_or_text_line, 8, 9)):
+                    part_number = self.append_confirm(part_number)
                 return part_number
 
         raise ValueError("Unable to find valid part number")
 
     def validate_and_get_description(self, text_line_horizontal):
         description = self.get_value(text_line_horizontal)
-        if not self.valid_x_location(text_line_horizontal, 228, 232):
+        if not self.valid_x_location(text_line_horizontal, 228, 234):
             description = self.append_confirm(description)
         return description
         # raise ValueError("Unable to find valid description")
@@ -84,7 +87,7 @@ class ValidationHelper:
     def validate_and_get_quantity(self, text_line_horizontal):
         quantity = self.get_value(text_line_horizontal)
         if quantity.isnumeric():
-            if not self.valid_x_location(text_line_horizontal, 510, 523):
+            if not self.valid_x_location(text_line_horizontal, 510, 535):
                 quantity = self.append_confirm(quantity)
             return quantity
         raise ValueError("Unable to find valid quantity")

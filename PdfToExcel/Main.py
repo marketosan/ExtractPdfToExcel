@@ -26,8 +26,8 @@ class MyPdfToExcelExtractor:
         self.get_purchase_order()
 
     # only to create xml representation of pdf
-    def extract_pdf_to_xml_file(self):
-        self.pdf.tree.write('my_pdf_as_xml.xml', pretty_print=True)
+    def extract_pdf_to_xml_file(self, number):
+        self.pdf.tree.write(f'generated_xmls/my_pdf_as_xml{number}.xml', pretty_print=True)
 
     def get_purchase_order(self):
         purchase_order_matched = self.pdf.pq('LTTextLineHorizontal:contains("PURCHASE ORDER:")')
@@ -44,6 +44,9 @@ class MyPdfToExcelExtractor:
                 if isinstance(child_text_line_horizontal.layout, LTTextLineHorizontal):
                     line_text_value = self.validation_helper.get_value(child_text_line_horizontal)
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
+                        if "TOTAL AMOUNT FOR ORDER" in self.validation_helper.get_value(
+                                parent_rect_with_info.getchildren()[idx + 1].getchildren()[0]):
+                            continue
                         self.final_items.append(self.get_product_from_parent_rect(idx, parent_rect_with_info))
 
     def get_product_from_parent_rect(self, index, parent_rect):
@@ -70,7 +73,7 @@ class MyPdfToExcelExtractor:
     def show_error_popup(exception):
         root = tk.Tk()
         root.withdraw()  # Hide the main window
-        error_message = f"{type(e).__name__}: {str(e)}\n Please contact admin to resolve issue.\n\nTraceback:\n{traceback.format_exc()}"
+        error_message = f"{type(exception).__name__}: {str(exception)}\n Please contact admin to resolve issue.\n\nTraceback:\n{traceback.format_exc()}"
         messagebox.showerror("Error", error_message)
 
 
@@ -78,8 +81,11 @@ class MyPdfToExcelExtractor:
 # MAIN
 if __name__ == '__main__':
     try:
-        pdfToExcelExtractor = MyPdfToExcelExtractor('./samples/mypdf.PDF')
-        pdfToExcelExtractor.extract_and_save_all_fields()
-        pdfToExcelExtractor.print_extracted_data()
+        for i in range(1, 7):
+            number = i
+            pdfToExcelExtractor = MyPdfToExcelExtractor(f"./samples/mypdf{number}.PDF")
+            pdfToExcelExtractor.extract_and_save_all_fields()
+            pdfToExcelExtractor.print_extracted_data()
+    # pdfToExcelExtractor.extract_pdf_to_xml_file(number)
     except Exception as e:
         MyPdfToExcelExtractor.show_error_popup(e)
