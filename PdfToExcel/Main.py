@@ -86,6 +86,5 @@ if __name__ == '__main__':
             pdfToExcelExtractor = MyPdfToExcelExtractor(f"./samples/mypdf{number}.PDF")
             pdfToExcelExtractor.extract_and_save_all_fields()
             pdfToExcelExtractor.print_extracted_data()
-    # pdfToExcelExtractor.extract_pdf_to_xml_file(number)
     except Exception as e:
         MyPdfToExcelExtractor.show_error_popup(e)
