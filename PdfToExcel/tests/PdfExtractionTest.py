@@ -1,0 +1,59 @@
+import unittest
+
+from PdfToExcel.main.Main import MyPdfToExcelExtractor
+from PdfToExcel.main.Product import Product
+
+
+class pdfExtractionTest(unittest.TestCase):
+
+    def test_extract_one_pdf_full_data(self):
+        pdfToExcelExtractor = MyPdfToExcelExtractor(f"./samples/mypdf1.PDF")
+        pdfToExcelExtractor.extract_files()
+        # pdfToExcelExtractor.print_extracted_data()
+        self.assert_products_equal(pdfToExcelExtractor.final_items[0], Product('400-0530', 'Cover, Plastic, MSFD Alarm PCB', '3', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[1], Product('400-0531', 'Cover, Plastic, MSFD Voltage M', '2', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[2], Product('400-0736', 'Bracket, Back Divider CPRI 1U 19”', '2', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[3], Product('400-1165', 'Bracket, Step, 12 Position, Neutral', '30', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[4], Product('400-1453', 'Cover Asm, Top, 3-Pos 1U Alarm RM', '100', '01.06.2023', '4900046964'))
+
+        self.assert_products_equal(pdfToExcelExtractor.final_items[5], Product('400-1472', 'Bracket, Mounting, Universal YH/YQ-ZH/ZQ', '61', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[6], Product('810-0496', 'Harness, 3 Chan Strikesorb Alarm', '50', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[7], Product('850-0259', 'Busbar, GND A Box GEN', '20', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[8], Product('850-0304', 'Busbar, Ground, GB3-3-00-X', '50', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[9], Product('850-0577', 'Busbar, Bridge, 7 Pos, 26mm Pitch, L1', '60', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[10], Product('850-0660', 'Busbar, Return, Strikesorb 30, AL', '145', '01.06.2023', '4900046964'))
+        self.assert_products_equal(pdfToExcelExtractor.final_items[11], Product('850-0677', 'Bus Bar, Neutral, RMx-ED', '23', '01.06.2023', '4900046964'))
+
+
+
+
+    def test_extract_multiple_pdfs(self):
+        pdf_files = list()
+        for i in range(1,7):
+            pdf_files.append((f"./samples/mypdf{i}.PDF"))
+        pdfToExcelExtractor = MyPdfToExcelExtractor(pdf_files)
+        pdfToExcelExtractor.extract_files()
+        self.assertEqual(len(pdfToExcelExtractor.final_items), 39)
+
+    def assert_products_equal(self, actual: Product, expected: Product):
+        self.assertEqual(expected.get_part_number(), actual.get_part_number())
+        self.assertEqual(expected.get_description(), actual.get_description())
+        self.assertEqual(expected.get_quantity(), actual.get_quantity())
+        self.assertEqual(expected.get_delivery_date(), actual.get_delivery_date())
+        self.assertEqual(expected.get_purchase_order(), actual.get_purchase_order())
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+
+
+
+
+
+
+
+
+
+

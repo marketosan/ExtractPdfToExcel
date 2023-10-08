@@ -38,3 +38,15 @@ class Product:
 
     def __str__(self):
         return f"Part Number: {self._part_number}\nDescription: {self._description}\nQuantity: {self._quantity}\nDelivery Date: {self._delivery_date}\nPurchase Order: {self._purchase_order}"
+        # return f"Product('{self._part_number}', '{self._description}', '{self._quantity}', '{self._delivery_date}', '{self._purchase_order}')"
+
+    def __eq__(self, other):
+        if isinstance(other, Product):
+            return (
+                    self._part_number == other._part_number and
+                    self._description == other._description and
+                    self._quantity == other._quantity and
+                    self._delivery_date == other._delivery_date and
+                    self._purchase_order == other._purchase_order
+            )
+        return False

@@ -46,7 +46,7 @@ class ValidationHelper:
         if self.has_format(value, self.PURCHASE_ORDER_FORMAT):
             return value.strip().replace('\n', '').split(':')[1].strip()
         else:
-            raise ValueError("Unable to find valid purchase order")
+            raise ValueError("Unable to find purchase order")
 
     @staticmethod
     def append_confirm(value):
@@ -59,8 +59,7 @@ class ValidationHelper:
                 if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
                     part_number = part_number.split()[1]
                 if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-                    if not (self.valid_x_location(child_text_line_horizontal, 44, 46) or self.valid_x_location(
-                            child_text_line_horizontal, 8, 9)):
+                    if not (self.valid_x_location(child_text_line_horizontal, 44, 46) or self.valid_x_location(child_text_line_horizontal, 8, 9)):
                         part_number = self.append_confirm(part_number)
                     return part_number
 
@@ -70,8 +69,7 @@ class ValidationHelper:
                 part_number = part_number.split()[1]
             # no x_validation as this is non usual scenario
             if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-                if not (self.valid_x_location(textbox_or_text_line, 44, 46) or self.valid_x_location(
-                        textbox_or_text_line, 8, 9)):
+                if not (self.valid_x_location(textbox_or_text_line, 44, 46) or self.valid_x_location(textbox_or_text_line, 8, 9)):
                     part_number = self.append_confirm(part_number)
                 return part_number
 
@@ -94,8 +92,7 @@ class ValidationHelper:
 
     def validate_and_get_delivery_date(self, text_line_horizontal):
         delivery_date = self.get_value(text_line_horizontal)
-        if not self.valid_x_location(text_line_horizontal, 750, 753) and self.validate_date(delivery_date,
-                                                                                            self.DATE_FORMAT):
+        if not self.valid_x_location(text_line_horizontal, 750, 753) and self.validate_date(delivery_date,self.DATE_FORMAT):
             delivery_date = self.append_confirm(delivery_date)
         return delivery_date
         # raise ValueError("Unable to find valid delivery date")
