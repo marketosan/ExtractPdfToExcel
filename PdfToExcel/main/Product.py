@@ -36,6 +36,9 @@ class Product:
     def set_purchase_order(self, purchase_order):
         self._purchase_order = purchase_order
 
+    def to_list(self):
+        return [self._part_number, self._description, self._quantity, self._delivery_date, self._purchase_order]
+
     def __str__(self):
         return f"Part Number: {self._part_number}\nDescription: {self._description}\nQuantity: {self._quantity}\nDelivery Date: {self._delivery_date}\nPurchase Order: {self._purchase_order}"
         # return f"Product('{self._part_number}', '{self._description}', '{self._quantity}', '{self._delivery_date}', '{self._purchase_order}')"

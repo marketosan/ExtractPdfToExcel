@@ -1,13 +1,17 @@
 import unittest
 
+from PdfToExcel.main.ExcelPrinter import ExcelPrinter
 from PdfToExcel.main.Main import MyPdfToExcelExtractor
 from PdfToExcel.main.Product import Product
+import pandas as pd
+import os
+
 
 
 class pdfExtractionTest(unittest.TestCase):
 
     def test_extract_one_pdf_full_data(self):
-        pdfToExcelExtractor = MyPdfToExcelExtractor(f"./samples/mypdf1.PDF")
+        pdfToExcelExtractor = MyPdfToExcelExtractor(f"./samples/PDF_files/mypdf1.PDF")
         pdfToExcelExtractor.extract_files()
         # pdfToExcelExtractor.print_extracted_data()
         self.assert_products_equal(pdfToExcelExtractor.final_items[0], Product('400-0530', 'Cover, Plastic, MSFD Alarm PCB', '3', '01.06.2023', '4900046964'))
@@ -30,10 +34,30 @@ class pdfExtractionTest(unittest.TestCase):
     def test_extract_multiple_pdfs(self):
         pdf_files = list()
         for i in range(1,7):
-            pdf_files.append((f"./samples/mypdf{i}.PDF"))
+            pdf_files.append(f"./samples/PDF_files/mypdf{i}.PDF")
         pdfToExcelExtractor = MyPdfToExcelExtractor(pdf_files)
         pdfToExcelExtractor.extract_files()
         self.assertEqual(len(pdfToExcelExtractor.final_items), 39)
+
+
+
+    def test_extract_multiple_pdfs_to_excel(self):
+        pdf_files = list()
+        for i in range(1,7):
+            pdf_files.append(f"./samples/PDF_files/mypdf{i}.PDF")
+        pdfToExcelExtractor = MyPdfToExcelExtractor(pdf_files)
+        pdfToExcelExtractor.extract_files()
+
+        excel_printer = ExcelPrinter()
+        result_file_name = excel_printer.print_to_pdf(pdfToExcelExtractor.final_items)
+        expected_result = pd.read_excel("./samples/XLSX_files/extracted_pdf-expected1.xlsx")
+        actual_result = pd.read_excel(result_file_name)
+        self.assertTrue(expected_result.equals(actual_result))
+        os.remove(result_file_name)
+
+
+
+
 
     def assert_products_equal(self, actual: Product, expected: Product):
         self.assertEqual(expected.get_part_number(), actual.get_part_number())
@@ -41,6 +65,7 @@ class pdfExtractionTest(unittest.TestCase):
         self.assertEqual(expected.get_quantity(), actual.get_quantity())
         self.assertEqual(expected.get_delivery_date(), actual.get_delivery_date())
         self.assertEqual(expected.get_purchase_order(), actual.get_purchase_order())
+
 
 
 if __name__ == '__main__':

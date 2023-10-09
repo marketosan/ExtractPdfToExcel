@@ -6,6 +6,7 @@ import tkinter as tk
 from pdfminer.layout import LTTextLineHorizontal
 from PdfToExcel.main.Product import Product
 from PdfToExcel.main.ValidationHelper import ValidationHelper
+from pdfquery import PDFQuery
 from tkinter import messagebox
 
 
@@ -25,9 +26,10 @@ class MyPdfToExcelExtractor:
 
     def extract_files(self):
         for file_path in self.file_paths_list:
-            pdf = pdfquery.PDFQuery(file_path)
+            pdf = PDFQuery(file_path)
             pdf.load()
             self.extract_and_save_all_fields(pdf)
+            pdf.file.close()
 
     def extract_and_save_all_fields(self, pdf):
         purchase_order_value = self.get_purchase_order(pdf)
