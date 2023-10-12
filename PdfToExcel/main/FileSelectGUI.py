@@ -1,4 +1,5 @@
 import tkinter as tk
+from datetime import datetime
 from tkinter import filedialog
 
 
@@ -6,23 +7,26 @@ class FileSelectGUI:
     FRAME_WIDTH = 450
     FRAME_HEIGHT = 400
     DISTANCE_FROM_TOP = 100
-    DISTANCE_FROM_LEFT = 420
+    DISTANCE_FROM_LEFT = 400
     RESIZABLE_X = False
     RESIZABLE_Y = False
 
-    def __init__(self, root):
+    RESULT_FILE_PREFIX = "extracted_pdfs-"
+    DATE_TIME_FORMAT = "%d_%b_%Y-%H_%M_%S"
+
+
+    def __init__(self):
+        root = tk.Tk()
         self.root_frame = root
         self.saved_file_paths = set()
 
         # Configure window properties
         self.root_frame.title("Extract PDF to Excel")
-        self.root_frame.geometry(
-            f"{self.FRAME_WIDTH}x{self.FRAME_HEIGHT}+{self.DISTANCE_FROM_LEFT}+{self.DISTANCE_FROM_TOP}")
+        self.root_frame.geometry(f"{self.FRAME_WIDTH}x{self.FRAME_HEIGHT}+{self.DISTANCE_FROM_LEFT}+{self.DISTANCE_FROM_TOP}")
         self.root_frame.resizable(self.RESIZABLE_X, self.RESIZABLE_Y)
 
         # Create listbox to display file paths
-        self.listbox = tk.Listbox(self.root_frame, width=70, height=14, font=8, xscrollcommand=True,
-                                  yscrollcommand=True)
+        self.listbox = tk.Listbox(self.root_frame, width=70, height=14, font=8, xscrollcommand=True, yscrollcommand=True)
         self.listbox.pack(pady=10)
 
         # Create frame for buttons
@@ -34,29 +38,45 @@ class FileSelectGUI:
         self.browse_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         # Create "Save" button
-        self.save_button = tk.Button(self.button_frame, text="Extract", command=self.save_paths, width=10)
-        self.save_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.extract_button = tk.Button(self.button_frame, text="Extract", command=self.extract_paths, width=10)
+        self.extract_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        root.mainloop()
 
     def browse_files(self):
-        selected_files = set(filedialog.askopenfilenames())
+        # open dialog to select files that allows to select only pdf files
+        selected_files = set(filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")]))
         for file_path in selected_files:
             file_name = file_path.strip().split('/')[-1]
+            self.listbox.insert(tk.END, file_name)
+            self.saved_file_paths.add(file_path)
 
-            if file_name.lower().endswith('.pdf') and file_path not in self.saved_file_paths:
-                self.listbox.insert(tk.END, file_name)
-                self.saved_file_paths.add(file_path)
+    def extract_paths(self):
+        if not self.saved_file_paths:
+            return
 
-    def save_paths(self):
+        self.file_with_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.get_file_name()
+        )
+
         self.root_frame.quit()
 
 
+    def get_file_name(self):
+        current_date_time = datetime.now()
+        formatted_date_time = current_date_time.strftime(self.DATE_TIME_FORMAT)
+        return self.RESULT_FILE_PREFIX + formatted_date_time + ".xlsx"
+
+
+
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = FileSelectGUI(root)
-    root.mainloop()
+    app = FileSelectGUI()
 
     # After the GUI is closed, you can access the selected file paths
     selected_paths = app.saved_file_paths
+    print(" File save to: " + app.file_with_path)
     print("Selected paths:")
     for path in selected_paths:
         print(path)
