@@ -62,7 +62,6 @@ class ValidationHelper:
                     if not (self.valid_x_location(child_text_line_horizontal, 44, 46) or self.valid_x_location(child_text_line_horizontal, 8, 9)):
                         part_number = self.append_confirm(part_number)
                     return part_number
-
         elif isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
             part_number = self.get_value(textbox_or_text_line)
             if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
@@ -92,7 +91,8 @@ class ValidationHelper:
 
     def validate_and_get_delivery_date(self, text_line_horizontal):
         delivery_date = self.get_value(text_line_horizontal)
-        if not self.valid_x_location(text_line_horizontal, 750, 753) and self.validate_date(delivery_date,self.DATE_FORMAT):
+        if not self.validate_date(delivery_date, self.DATE_FORMAT):
+            raise ValueError("Unable to find valid delivery date")
+        if not self.valid_x_location(text_line_horizontal, 747, 756):
             delivery_date = self.append_confirm(delivery_date)
         return delivery_date
-        # raise ValueError("Unable to find valid delivery date")

@@ -27,22 +27,20 @@ class ExcelPrinter:
             cell_A = row[:1][0]
             cell_A.alignment = Alignment(horizontal="left")
 
-    def print_to_pdf(self, data):
-        for product in data:
+    def print_to_pdf(self, products, file_name):
+        for product in products:
             self.sheet.append(product.to_list())
-        filen_name = "some_filename.xlsx"
-        self.workbook.save(filen_name)
-        print("Pdf files were successfully extracted to " + filen_name)
-        return filen_name
+        self.workbook.save(file_name)
+        print("Pdf files were successfully extracted to " + file_name)
 
 
 
 if __name__ == "__main__":
     p1 = Product("400-0530", "Cover, Plastic, MSFD Alarm PCB", "3", "01.06.2023", "4900046964")
     p2 = Product("400-0531", "Cover, Plastic, MSFD Voltage M", "2", "01.06.2023", "4900046964")
-    data = list()
-    data.append(p1)
-    data.append(p2)
+    products = list()
+    products.append(p1)
+    products.append(p2)
 
     excel_printer = ExcelPrinter()
-    excel_printer.print_to_pdf(data)
+    excel_printer.print_to_pdf(products, "some_filename.xlsx")

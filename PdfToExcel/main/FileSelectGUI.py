@@ -18,7 +18,7 @@ class FileSelectGUI:
     def __init__(self):
         root = tk.Tk()
         self.root_frame = root
-        self.saved_file_paths = set()
+        self.file_paths_to_extract = set()
 
         # Configure window properties
         self.root_frame.title("Extract PDF to Excel")
@@ -49,17 +49,20 @@ class FileSelectGUI:
         for file_path in selected_files:
             file_name = file_path.strip().split('/')[-1]
             self.listbox.insert(tk.END, file_name)
-            self.saved_file_paths.add(file_path)
+            self.file_paths_to_extract.add(file_path)
 
     def extract_paths(self):
-        if not self.saved_file_paths:
+        if not self.file_paths_to_extract:
             return
 
-        self.file_with_path = filedialog.asksaveasfilename(
+        self.extracted_file_name_with_path = filedialog.asksaveasfilename(
             defaultextension=".xlsx",
             filetypes=[("Excel files", "*.xlsx")],
             initialfile=self.get_file_name()
         )
+
+        if not self.extracted_file_name_with_path:
+            return
 
         self.root_frame.quit()
 
@@ -71,12 +74,12 @@ class FileSelectGUI:
 
 
 
-if __name__ == "__main__":
-    app = FileSelectGUI()
-
-    # After the GUI is closed, you can access the selected file paths
-    selected_paths = app.saved_file_paths
-    print(" File save to: " + app.file_with_path)
-    print("Selected paths:")
-    for path in selected_paths:
-        print(path)
+# if __name__ == "__main__":
+#     app = FileSelectGUI()
+#
+#     # After the GUI is closed, you can access the selected file paths
+#     selected_paths = app.file_paths_to_extract
+#     print(" File save to: " + app.file_with_path)
+#     print("Selected paths:")
+#     for path in selected_paths:
+#         print(path)
