@@ -23,11 +23,11 @@ class MyPdfToExcelExtractor:
     def __init__(self, file_paths_set):
         self.validation_helper = ValidationHelper()
 
-        if not file_paths_set:
-            print("Was expecting a set or list but received: ", type(file_paths_set))
-            exit()
+        if isinstance(file_paths_set, set) or isinstance(file_paths_set, list):
+            self.file_paths_set = file_paths_set
+        else:
+            self.file_paths_set = {file_paths_set}
 
-        self.file_paths_set = file_paths_set
         self.extracted_products = list()
 
     # './samples/PDF_files/mypdf3.PDF'
@@ -52,10 +52,12 @@ class MyPdfToExcelExtractor:
                 if isinstance(child_text_line_horizontal.layout, LTTextLineHorizontal):
                     line_text_value = self.validation_helper.get_value(child_text_line_horizontal)
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
-                        if "TOTAL AMOUNT FOR ORDER" in self.validation_helper.get_value(parent_rect_with_info.getchildren()[idx + 1].getchildren()[0]):
+                        next_value = self.validation_helper.get_value(parent_rect_with_info.getchildren()[idx + 1].getchildren()[0])
+                        if "TOTAL AMOUNT FOR ORDER" in next_value or self.ITEMS_LINE_SEPARATOR in next_value:
                             continue
-                        # using thre index of the line separators we can find all items after it
-                        self.extracted_products.append(self.get_product_from_parent_rect(idx, parent_rect_with_info, purchase_order_value))
+                        else:
+                            # using the index of the line separators we can find all items after it
+                            self.extracted_products.append(self.get_product_from_parent_rect(idx, parent_rect_with_info, purchase_order_value))
 
     def get_purchase_order(self, pdf):
         purchase_order_matched = pdf.pq('LTTextLineHorizontal:contains("PURCHASE ORDER:")')
@@ -80,8 +82,8 @@ class MyPdfToExcelExtractor:
             print('-----------------')
 
     # only to create xml representation of pdf
-    # def extract_pdf_to_xml_file(self, number):
-    #     self.pdf.tree.write(f'generated_xmls/my_pdf_as_xml{number}.xml', pretty_print=True)
+    def extract_pdf_to_xml_file(self):
+        self.pdf.tree.write(f'generated_xmls/my_pdf_as_xml.xml', pretty_print=True)
 
     @staticmethod
     def show_error_popup(exception):

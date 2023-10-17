@@ -7,7 +7,7 @@ from datetime import datetime
 class ExcelPrinter:
     COLUMN_TITLES = ["Part Number", "Description", "Qty", "PO", "Delivery date"]
     PART_NUMBER_SIZE = 15
-    DESCRIPTION_SIZE = 30
+    DESCRIPTION_SIZE = 50
     QUANTITY_SIZE = 8
     PURCHASE_ORDER_SIZE = 15
     DELIVERY_DATE_SIZE = 20
