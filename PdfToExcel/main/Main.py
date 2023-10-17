@@ -50,7 +50,11 @@ class MyPdfToExcelExtractor:
             # then searching for line separators e.g. ------
             for idx, child_text_line_horizontal in enumerate(parent_rect_with_info.iterchildren()):
                 if isinstance(child_text_line_horizontal.layout, LTTextLineHorizontal):
-                    line_text_value = self.validation_helper.get_value(child_text_line_horizontal)
+                    try:
+                        line_text_value = self.validation_helper.get_value(child_text_line_horizontal)
+                    except Exception:
+                        line_text_value = ""
+
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
                         next_value = self.validation_helper.get_value(parent_rect_with_info.getchildren()[idx + 1].getchildren()[0])
                         if "TOTAL AMOUNT FOR ORDER" in next_value or self.ITEMS_LINE_SEPARATOR in next_value:
@@ -69,7 +73,11 @@ class MyPdfToExcelExtractor:
         if len(rect_children) < line_separator_index + self.DELIVERY_DATE_INX_AFTER_LINE:
             raise ValueError("Received unexpected PDF format, wont be able to retrieve data")
 
-        part_number = self.validation_helper.validate_and_get_part_number(rect_children[line_separator_index + self.PART_NUMBER_INX_AFTER_LINE])
+        part_number = self.validation_helper.validate_and_get_part_number(rect_children[line_separator_index + self.PART_NUMBER_INX_AFTER_LINE], False)
+        if part_number is None:
+            line_separator_index += 1
+            part_number = self.validation_helper.validate_and_get_part_number(rect_children[line_separator_index + self.PART_NUMBER_INX_AFTER_LINE], True)
+
         description = self.validation_helper.validate_and_get_description(rect_children[line_separator_index + self.DESCRIPTION_INX_AFTER_LINE])
         quantity = self.validation_helper.validate_and_get_quantity(rect_children[line_separator_index + self.QUANTITY_INX_AFTER_LINE])
         delivery_date = self.validation_helper.validate_and_get_delivery_date(rect_children[line_separator_index + self.DELIVERY_DATE_INX_AFTER_LINE])

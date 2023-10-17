@@ -52,6 +52,27 @@ class pdfExtractionTest(unittest.TestCase):
         self.assertTrue(expected_result.equals(actual_result))
         os.remove(result_file_name)
 
+
+    def test_extract_with_numeric_part_numbers(self):
+        pdf_files = list()
+        pdf_files.append("./samples/PDF_files/mypdf7.PDF")
+        pdf_files.append("./samples/PDF_files/mypdf_mixed_part_numbers.PDF")
+        pdf_files.append("./samples/PDF_files/mypdf_numeric_part_numbers.pdf")
+
+        pdf_to_excel_extractor = MyPdfToExcelExtractor(pdf_files)
+        pdf_to_excel_extractor.extract_files()
+
+        excel_printer = ExcelPrinter()
+        result_file_name = "some_filename2.xlsx"
+        excel_printer.print_to_pdf(pdf_to_excel_extractor.extracted_products, result_file_name)
+
+        expected_result = pd.read_excel("./samples/XLSX_files/extracted_pdf-expected_when_having_also_numeric_part_numbers.xlsx")
+        actual_result = pd.read_excel(result_file_name)
+
+        self.assertEqual(len(pdf_to_excel_extractor.extracted_products), 29)
+        self.assertTrue(expected_result.equals(actual_result))
+        os.remove(result_file_name)
+
     def assert_products_equal(self, actual: Product, expected: Product):
         self.assertEqual(expected.get_part_number(), actual.get_part_number())
         self.assertEqual(expected.get_description(), actual.get_description())

@@ -52,27 +52,34 @@ class ValidationHelper:
     def append_confirm(value):
         return value + " (CONFIRM)"
 
-    def validate_and_get_part_number(self, textbox_or_text_line):
+    def validate_and_get_part_number(self, textbox_or_text_line, allow_numeric_part_number):
+        part_number = None
         if isinstance(textbox_or_text_line.layout, LTTextBoxHorizontal):
             for child_text_line_horizontal in textbox_or_text_line.iterchildren():
-                part_number = self.get_value(child_text_line_horizontal)
-                if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
-                    part_number = part_number.split()[1]
-                if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-                    if not (self.valid_x_location(child_text_line_horizontal, 44, 46) or self.valid_x_location(child_text_line_horizontal, 8, 9)):
-                        part_number = self.append_confirm(part_number)
+                # we should never allow numeric in current case as we search among multiple lines to find part number
+                # and we dont have enough info to differentiate it from AA if it is numeric
+                part_number = self.get_part_number(child_text_line_horizontal)
+                if part_number is not None:
                     return part_number
         elif isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
-            part_number = self.get_value(textbox_or_text_line)
-            if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
-                part_number = part_number.split()[1]
-            # no x_validation as this is non usual scenario
-            if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-                if not (self.valid_x_location(textbox_or_text_line, 44, 46) or self.valid_x_location(textbox_or_text_line, 8, 9)):
-                    part_number = self.append_confirm(part_number)
-                return part_number
+            part_number = self.get_part_number(textbox_or_text_line, allow_numeric_part_number)
 
-        raise ValueError("Unable to find valid part number")
+        if part_number is None and allow_numeric_part_number:
+            ValueError("Unable to find part number")
+
+        return part_number
+
+    def get_part_number(self, text_line, allow_numeric_part_number=False):
+        part_number = self.get_value(text_line)
+        if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
+            part_number = part_number.split()[1]
+        if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+            if not (self.valid_x_location(text_line, 44, 46) or self.valid_x_location(text_line, 8, 9)):
+                part_number = self.append_confirm(part_number)
+            return part_number
+        if allow_numeric_part_number and part_number.isnumeric():
+            return part_number
+        return None
 
     def validate_and_get_description(self, text_line_horizontal):
         description = self.get_value(text_line_horizontal)
@@ -83,8 +90,8 @@ class ValidationHelper:
 
     def validate_and_get_quantity(self, text_line_horizontal):
         quantity = self.get_value(text_line_horizontal)
-        if quantity.isnumeric():
-            if not self.valid_x_location(text_line_horizontal, 510, 535):
+        if quantity.replace('.', '').isnumeric():
+            if not self.valid_x_location(text_line_horizontal, 508, 545):
                 quantity = self.append_confirm(quantity)
             return quantity
         raise ValueError("Unable to find valid quantity")
