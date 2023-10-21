@@ -38,7 +38,7 @@ class pdfExtractionTest(unittest.TestCase):
 
     def test_extract_multiple_pdfs_to_excel(self):
         pdf_files = list()
-        for i in range(1,7):
+        for i in range(1, 7):
             pdf_files.append(f"./samples/PDF_files/mypdf{i}.PDF")
         pdf_to_excel_extractor = MyPdfToExcelExtractor(pdf_files)
         pdf_to_excel_extractor.extract_files()
@@ -70,6 +70,21 @@ class pdfExtractionTest(unittest.TestCase):
         actual_result = pd.read_excel(result_file_name)
 
         self.assertEqual(len(pdf_to_excel_extractor.extracted_products), 29)
+        self.assertTrue(expected_result.equals(actual_result))
+        os.remove(result_file_name)
+
+    def test_when_description_in_box(self):
+        pdf_to_excel_extractor = MyPdfToExcelExtractor("./samples/PDF_files/mypdf_description_in_box.PDF")
+        pdf_to_excel_extractor.extract_files()
+
+        excel_printer = ExcelPrinter()
+        result_file_name = "samples/XLSX_files/some_filename3.xlsx"
+        excel_printer.print_to_pdf(pdf_to_excel_extractor.extracted_products, result_file_name)
+
+        expected_result = pd.read_excel("./samples/XLSX_files/extracted_pdf-expected_when_description_in_box.xlsx")
+        actual_result = pd.read_excel(result_file_name)
+
+        self.assertEqual(len(pdf_to_excel_extractor.extracted_products), 23)
         self.assertTrue(expected_result.equals(actual_result))
         os.remove(result_file_name)
 

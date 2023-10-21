@@ -7,8 +7,7 @@ from pdfminer.layout import LTTextBoxHorizontal, LTTextLineHorizontal
 class ValidationHelper:
     PURCHASE_ORDER_FORMAT = r'^PURCHASE ORDER:(\s)*\d+$'
     PART_NUMBER_PATTERN = r'^(\d+-)+\d+$'  # e.g 400-0178-123
-    PART_NUMBER_PATTERN_WITH_AA = r'^\d{5}\s+(\d+-)+\d+$'  # e.g 0010 400-0178
-    PART_NUMBER_NUMERIC_PATTERN_WITH_AA = r'^\d{5}\s+\d+$'  # e.g 0010 4000178
+    PART_NUMBER_PATTERN_WITH_AA = r'^\d+\s+(\d+-)+\d+$'  # e.g 0010 400-0178
     DATE_FORMAT = '%d.%m.%Y'
 
     def __init__(self):
@@ -53,25 +52,41 @@ class ValidationHelper:
     def append_confirm(value):
         return value + " (CONFIRM)"
 
-    def validate_and_get_part_number(self, text_line):
-        part_number = self.get_value(text_line)
-        if self.has_format(part_number, self.PART_NUMBER_PATTERN):
-            return part_number
-        if part_number.isnumeric() and len(part_number) > 5:
-            return part_number
-        raise ValueError("Unable to find part number")
+    def validate_and_get_part_number(self, textbox_or_text_line, allow_numeric_part_number):
+        part_number = None
+        if isinstance(textbox_or_text_line.layout, LTTextBoxHorizontal):
+            for child_text_line_horizontal in textbox_or_text_line.iterchildren():
+                # we should never allow numeric in current case as we search among multiple lines to find part number
+                # and we dont have enough info to differentiate it from AA if it is numeric
+                part_number = self.get_part_number(child_text_line_horizontal)
+                if part_number is not None:
+                    return part_number
+        elif isinstance(textbox_or_text_line.layout, LTTextLineHorizontal):
+            part_number = self.get_part_number(textbox_or_text_line, allow_numeric_part_number)
 
-    def validate_and_get_part_number_without_aa(self, text_line):
+        if part_number is None and allow_numeric_part_number:
+            ValueError("Unable to find part number")
+
+        return part_number
+
+    def get_part_number(self, text_line, allow_numeric_part_number=False):
         part_number = self.get_value(text_line)
-        if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA) or self.has_format(part_number, self.PART_NUMBER_NUMERIC_PATTERN_WITH_AA):
-            return part_number.split()[1]
+        if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
+            part_number = part_number.split()[1]
+        if self.has_format(part_number, self.PART_NUMBER_PATTERN):
+            if not (self.valid_x_location(text_line, 44, 46) or self.valid_x_location(text_line, 8, 9)):
+                part_number = self.append_confirm(part_number)
+            return part_number
+        if allow_numeric_part_number and part_number.isnumeric():
+            return part_number
         return None
 
     def validate_and_get_description(self, text_line_horizontal):
         description = self.get_value(text_line_horizontal)
-        if description is not None:
-            return description
-        raise ValueError("Unable to find description")
+        if not self.valid_x_location(text_line_horizontal, 228, 234):
+            description = self.append_confirm(description)
+        return description
+        # raise ValueError("Unable to find valid description")
 
     def validate_and_get_quantity(self, text_line_horizontal):
         quantity = self.get_value(text_line_horizontal)
@@ -83,6 +98,8 @@ class ValidationHelper:
 
     def validate_and_get_delivery_date(self, text_line_horizontal):
         delivery_date = self.get_value(text_line_horizontal)
-        if self.validate_date(delivery_date, self.DATE_FORMAT):
-            return delivery_date
-        raise ValueError("Unable to find valid delivery date")
+        if not self.validate_date(delivery_date, self.DATE_FORMAT):
+            raise ValueError("Unable to find valid delivery date")
+        if not self.valid_x_location(text_line_horizontal, 747, 756):
+            delivery_date = self.append_confirm(delivery_date)
+        return delivery_date
