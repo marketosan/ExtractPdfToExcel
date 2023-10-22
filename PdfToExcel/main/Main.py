@@ -37,7 +37,7 @@ class MyPdfToExcelExtractor:
                 self.extract_and_save_all_fields(pdf)
                 pdf.file.close()
             except Exception as e:
-                # self.show_error_popup(e, file_path)
+                self.show_error_popup(e, file_path)
                 print(e)
                 exit()
         print("Received data successfully")
