@@ -6,9 +6,8 @@ from pdfminer.layout import LTTextBoxHorizontal, LTTextLineHorizontal
 
 class ValidationHelper:
     PURCHASE_ORDER_FORMAT = r'^PURCHASE ORDER:(\s)*\d+$'
-    PART_NUMBER_PATTERN = r'^(\d+-)+\d+$'  # e.g 400-0178-123
-    PART_NUMBER_PATTERN_WITH_AA = r'^\d{5}\s+(\d+-)+\d+$'  # e.g 0010 400-0178
-    PART_NUMBER_NUMERIC_PATTERN_WITH_AA = r'^\d{5}\s+\d+$'  # e.g 0010 4000178
+    PART_NUMBER_PATTERN = r'^[A-Z0-9-]+'  # e.g 400-0178-123 or A123 or A123-
+    PART_NUMBER_PATTERN_WITH_AA = r'^\d{5}\s+[A-Z0-9-]+'  # e.g 0010 400-0178 or part number as above
     DATE_FORMAT = '%d.%m.%Y'
 
     def __init__(self):
@@ -57,13 +56,11 @@ class ValidationHelper:
         part_number = self.get_value(text_line)
         if self.has_format(part_number, self.PART_NUMBER_PATTERN):
             return part_number
-        if part_number.isnumeric() and len(part_number) > 5:
-            return part_number
         raise ValueError("Unable to find part number")
 
     def validate_and_get_part_number_without_aa(self, text_line):
         part_number = self.get_value(text_line)
-        if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA) or self.has_format(part_number, self.PART_NUMBER_NUMERIC_PATTERN_WITH_AA):
+        if self.has_format(part_number, self.PART_NUMBER_PATTERN_WITH_AA):
             return part_number.split()[1]
         return None
 
