@@ -1,7 +1,6 @@
 import openpyxl
 from openpyxl.styles import Alignment
-from PdfToExcel.main.Product import Product
-from datetime import datetime
+from product import Product
 
 
 class ExcelPrinter:

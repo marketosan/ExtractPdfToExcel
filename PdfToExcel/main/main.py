@@ -4,10 +4,10 @@ import tkinter as tk
 
 from pdfminer.layout import LTTextLineHorizontal, LTTextBoxHorizontal
 
-from PdfToExcel.main.ExcelPrinter import ExcelPrinter
-from PdfToExcel.main.FileSelectGUI import FileSelectGUI
-from PdfToExcel.main.Product import Product
-from PdfToExcel.main.ValidationHelper import ValidationHelper
+from excel_printer import ExcelPrinter
+from file_select_gui import FileSelectGUI
+from product import Product
+from validation_helper import ValidationHelper
 from pdfquery import PDFQuery
 from tkinter import messagebox
 
@@ -60,12 +60,14 @@ class MyPdfToExcelExtractor:
                         line_text_value = ""
 
                     if self.ITEMS_LINE_SEPARATOR in line_text_value:
-                        next_value = self.validation_helper.get_value(parent_rect_with_info.getchildren()[idx + 1].getchildren()[0])
+                        next_value = self.validation_helper.get_value(
+                            parent_rect_with_info.getchildren()[idx + 1].getchildren()[0])
                         if "TOTAL AMOUNT FOR ORDER" in next_value or self.ITEMS_LINE_SEPARATOR in next_value:
                             continue
                         else:
                             # using the index of the line separators we can find all items after it
-                            self.extracted_products.append(self.get_product_from_parent_rect(idx, parent_rect_with_info, purchase_order_value))
+                            self.extracted_products.append(
+                                self.get_product_from_parent_rect(idx, parent_rect_with_info, purchase_order_value))
 
     def get_purchase_order(self, pdf):
         purchase_order_matched = pdf.pq('LTTextLineHorizontal:contains("PURCHASE ORDER:")')
@@ -104,7 +106,8 @@ class MyPdfToExcelExtractor:
         rect_children = parent_rect.getchildren()
 
         idx = line_separator_index + 1
-        next_field_to_find = [self.check_and_return_if_part_number, self.check_and_return_if_description, self.check_and_return_if_date]
+        next_field_to_find = [self.check_and_return_if_part_number, self.check_and_return_if_description,
+            self.check_and_return_if_date]
         found_values = list()
 
         while len(next_field_to_find) > 0 and line_separator_index < line_separator_index + 10:

@@ -1,8 +1,8 @@
 import unittest
 
-from PdfToExcel.main.ExcelPrinter import ExcelPrinter
-from PdfToExcel.main.Main import MyPdfToExcelExtractor
-from PdfToExcel.main.Product import Product
+from excel_printer import ExcelPrinter
+from main import MyPdfToExcelExtractor
+from product import Product
 import pandas as pd
 import os
 

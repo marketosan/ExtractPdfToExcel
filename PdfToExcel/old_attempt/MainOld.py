@@ -4,9 +4,9 @@ import tkinter as tk
 
 from pdfminer.layout import LTTextLineHorizontal
 
-from PdfToExcel.main.ExcelPrinter import ExcelPrinter
-from PdfToExcel.main.FileSelectGUI import FileSelectGUI
-from PdfToExcel.main.Product import Product
+from excel_printer import ExcelPrinter
+from file_select_gui import FileSelectGUI
+from product import Product
 from PdfToExcel.old_attempt.ValidationHelperOld import ValidationHelper
 from pdfquery import PDFQuery
 from tkinter import messagebox

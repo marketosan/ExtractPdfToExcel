@@ -1,9 +1,6 @@
 from re import match
 from datetime import datetime
 
-from pdfminer.layout import LTTextBoxHorizontal, LTTextLineHorizontal
-
-
 class ValidationHelper:
     PURCHASE_ORDER_FORMAT = r'^PURCHASE ORDER:(\s)*\d+$'
     PART_NUMBER_PATTERN = r'^[A-Z0-9-]+'  # e.g 400-0178-123 or A123 or A123-
