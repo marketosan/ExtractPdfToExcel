@@ -152,5 +152,6 @@ if __name__ == '__main__':
     pdf_to_excel_extractor = MyPdfToExcelExtractor(ui_interface.file_paths_to_extract)
     pdf_to_excel_extractor.extract_files()
 
-    excel_printer = ExcelPrinter()
-    excel_printer.print_to_pdf(pdf_to_excel_extractor.extracted_products, ui_interface.extracted_file_name_with_path)
+    if ui_interface.extracted_file_name_with_path is not None:
+        excel_printer = ExcelPrinter()
+        excel_printer.print_to_pdf(pdf_to_excel_extractor.extracted_products, ui_interface.extracted_file_name_with_path)

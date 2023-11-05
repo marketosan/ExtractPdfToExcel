@@ -16,9 +16,10 @@ class FileSelectGUI:
 
 
     def __init__(self):
-        root = tk.Tk()
-        self.root_frame = root
+        self.root_frame = tk.Tk()
+        self.root_frame.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.file_paths_to_extract = set()
+        self.extracted_file_name_with_path = None
 
         # Configure window properties
         self.root_frame.title("Extract PDF to Excel")
@@ -41,7 +42,11 @@ class FileSelectGUI:
         self.extract_button = tk.Button(self.button_frame, text="Extract", command=self.extract_paths, width=10)
         self.extract_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-        root.mainloop()
+        self.root_frame.mainloop()
+
+    def on_closing(self):
+        self.root_frame.destroy()
+        exit()
 
     def browse_files(self):
         # open dialog to select files that allows to select only pdf files
